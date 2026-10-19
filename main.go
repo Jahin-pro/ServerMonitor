@@ -26,12 +26,12 @@ func (s *Server) SetAvailability(available bool) {
 
 func main() {
 	fmt.Println("ServerMonitor")
-	servicesNames := []string{"CodexSandboxService.OpenAI.Codex", "LxssManager", "Spooler", "PostgreSQL"}
+	serviceNames := []string{"CodexSandboxService.OpenAI.Codex", "LxssManager", "DefinitelyNotInstalled_Test_12345", "Spooler", "PostgreSQL"}
 
-	for _, serviceName := range servicesNames {
-		isRunningGpt, err := checkService(serviceName)
+	for _, serviceName := range serviceNames {
+		isRunning, err := checkService(serviceName)
 		if err == nil {
-			fmt.Println("Service is running:", isRunningGpt)
+			fmt.Println("Service is running:", isRunning)
 		} else {
 			fmt.Printf("Error checking service %s: %v\n", serviceName, err)
 		}
