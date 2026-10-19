@@ -26,22 +26,16 @@ func (s *Server) SetAvailability(available bool) {
 
 func main() {
 	fmt.Println("ServerMonitor")
+	servicesNames := []string{"CodexSandboxService.OpenAI.Codex", "LxssManager", "Spooler", "PostgreSQL"}
 
-	isRunningGpt, err := checkService("CodexSandboxService.OpenAI.Codex")
-
-	if err == nil {
-		fmt.Println("Service is running:", isRunningGpt)
-	} else {
-		fmt.Printf("Error checking service: %v\n", err)
+	for _, serviceName := range servicesNames {
+		isRunningGpt, err := checkService(serviceName)
+		if err == nil {
+			fmt.Println("Service is running:", isRunningGpt)
+		} else {
+			fmt.Printf("Error checking service %s: %v\n", serviceName, err)
+		}
 	}
-
-	isRunningLxssManager, err := checkService("LxssManager")
-	if err == nil {
-		fmt.Println("Service is running:", isRunningLxssManager)
-	} else {
-		fmt.Printf("Error checking service: %v\n", err)
-	}
-
 }
 
 func checkServer(name string) (bool, error) {
