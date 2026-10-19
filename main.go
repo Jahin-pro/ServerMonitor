@@ -27,12 +27,11 @@ func (s *Server) SetAvailability(available bool) {
 func main() {
 	fmt.Println("ServerMonitor")
 
-	isRunningMySQL80, err := checkService("MySQL80")
+	isRunningGpt, err := checkService("CodexSandboxService.OpenAI.Codex")
 	if err != nil {
 		fmt.Printf("Error checking service: %v\n", err)
-		return
 	}
-	fmt.Println("Server is running:", isRunningMySQL80)
+	fmt.Println("Server is running:", isRunningGpt)
 	isRunningLxssManager, err := checkService("LxssManager")
 	if err != nil {
 		fmt.Printf("Error checking service: %v\n", err)
