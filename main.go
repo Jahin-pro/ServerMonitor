@@ -28,16 +28,20 @@ func main() {
 	fmt.Println("ServerMonitor")
 
 	isRunningGpt, err := checkService("CodexSandboxService.OpenAI.Codex")
-	if err != nil {
+
+	if err == nil {
+		fmt.Println("Service is running:", isRunningGpt)
+	} else {
 		fmt.Printf("Error checking service: %v\n", err)
 	}
-	fmt.Println("Server is running:", isRunningGpt)
+
 	isRunningLxssManager, err := checkService("LxssManager")
-	if err != nil {
+	if err == nil {
+		fmt.Println("Service is running:", isRunningLxssManager)
+	} else {
 		fmt.Printf("Error checking service: %v\n", err)
-		return
 	}
-	fmt.Println("Server is running:", isRunningLxssManager)
+
 }
 
 func checkServer(name string) (bool, error) {
@@ -50,16 +54,16 @@ func checkServer(name string) (bool, error) {
 }
 
 func checkService(serviceName string) (bool, error) {
+	if serviceName == "" {
+		return false, fmt.Errorf("service name is empty")
+	}
+
 	m, err := mgr.Connect()
 	if err != nil {
 		return false, fmt.Errorf("failed to connect to SCM: %w", err)
 	}
 	defer m.Disconnect()
 	fmt.Println("Connected to SCM")
-
-	if serviceName == "" {
-		return false, fmt.Errorf("service name is empty")
-	}
 
 	services, err := m.OpenService(serviceName)
 	if err != nil {
