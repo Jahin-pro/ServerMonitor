@@ -8,6 +8,12 @@ import (
 	"golang.org/x/sys/windows/svc"
 )
 
+type ServiceResult struct {
+	Name      string
+	IsRunning bool
+	err       error
+}
+
 type Server struct {
 	Name        string
 	Address     string
@@ -26,14 +32,23 @@ func (s *Server) SetAvailability(available bool) {
 
 func main() {
 	fmt.Println("ServerMonitor")
+	var results []ServiceResult
 	serviceNames := []string{"CodexSandboxService.OpenAI.Codex", "LxssManager", "DefinitelyNotInstalled_Test_12345", "Spooler", "PostgreSQL"}
 
 	for _, serviceName := range serviceNames {
 		isRunning, err := checkService(serviceName)
 		if err == nil {
-			fmt.Println("Service is running:", isRunning)
+			results = append(results, ServiceResult{Name: serviceName, IsRunning: isRunning, err: nil})
 		} else {
-			fmt.Printf("Error checking service %s: %v\n", serviceName, err)
+			results = append(results, ServiceResult{Name: serviceName, IsRunning: false, err: err})
+		}
+	}
+
+	for _, result := range results {
+		if result.err != nil {
+			fmt.Printf("Service: %s, Error: %v\n", result.Name, result.err)
+		} else {
+			fmt.Printf("Service: %s, Is Running: %v\n", result.Name, result.IsRunning)
 		}
 	}
 }
