@@ -11,7 +11,7 @@ import (
 type ServiceResult struct {
 	Name      string
 	IsRunning bool
-	err       error
+	Err       error
 }
 
 type Server struct {
@@ -33,7 +33,7 @@ func (s *Server) SetAvailability(available bool) {
 func main() {
 	fmt.Println("ServerMonitor")
 	serviceNames := []string{"CodexSandboxService.OpenAI.Codex", "LxssManager", "DefinitelyNotInstalled_Test_12345", "Spooler", "PostgreSQL"}
-	serviceResults := collectresults(serviceNames)
+	serviceResults := collectResults(serviceNames)
 	printReport(serviceResults)
 }
 
@@ -46,16 +46,12 @@ func checkServer(name string) (bool, error) {
 	return true, nil
 }
 
-func collectresults(names []string) []ServiceResult {
+func collectResults(names []string) []ServiceResult {
 	var result []ServiceResult
 
 	for _, serviceName := range names {
 		isRunning, err := checkService(serviceName)
-		if err == nil {
-			result = append(result, ServiceResult{Name: serviceName, IsRunning: isRunning, err: nil})
-		} else {
-			result = append(result, ServiceResult{Name: serviceName, IsRunning: false, err: err})
-		}
+		result = append(result, ServiceResult{Name: serviceName, IsRunning: isRunning, Err: err})
 	}
 	return result
 }
@@ -87,8 +83,8 @@ func checkService(serviceName string) (bool, error) {
 
 func printReport(results []ServiceResult) {
 	for _, result := range results {
-		if result.err != nil {
-			fmt.Printf("Service: %s, Error: %v\n", result.Name, result.err)
+		if result.Err != nil {
+			fmt.Printf("Service: %s, Error: %v\n", result.Name, result.Err)
 		} else {
 			fmt.Printf("Service: %s, Is Running: %v\n", result.Name, result.IsRunning)
 		}
