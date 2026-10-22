@@ -32,25 +32,9 @@ func (s *Server) SetAvailability(available bool) {
 
 func main() {
 	fmt.Println("ServerMonitor")
-	var results []ServiceResult
 	serviceNames := []string{"CodexSandboxService.OpenAI.Codex", "LxssManager", "DefinitelyNotInstalled_Test_12345", "Spooler", "PostgreSQL"}
-
-	for _, serviceName := range serviceNames {
-		isRunning, err := checkService(serviceName)
-		if err == nil {
-			results = append(results, ServiceResult{Name: serviceName, IsRunning: isRunning, err: nil})
-		} else {
-			results = append(results, ServiceResult{Name: serviceName, IsRunning: false, err: err})
-		}
-	}
-
-	for _, result := range results {
-		if result.err != nil {
-			fmt.Printf("Service: %s, Error: %v\n", result.Name, result.err)
-		} else {
-			fmt.Printf("Service: %s, Is Running: %v\n", result.Name, result.IsRunning)
-		}
-	}
+	serviceResults := collectresults(serviceNames)
+	printReport(serviceResults)
 }
 
 func checkServer(name string) (bool, error) {
@@ -60,6 +44,20 @@ func checkServer(name string) (bool, error) {
 
 	fmt.Println("Checking server:", name)
 	return true, nil
+}
+
+func collectresults(names []string) []ServiceResult {
+	var result []ServiceResult
+
+	for _, serviceName := range names {
+		isRunning, err := checkService(serviceName)
+		if err == nil {
+			result = append(result, ServiceResult{Name: serviceName, IsRunning: isRunning, err: nil})
+		} else {
+			result = append(result, ServiceResult{Name: serviceName, IsRunning: false, err: err})
+		}
+	}
+	return result
 }
 
 func checkService(serviceName string) (bool, error) {
@@ -72,20 +70,27 @@ func checkService(serviceName string) (bool, error) {
 		return false, fmt.Errorf("failed to connect to SCM: %w", err)
 	}
 	defer m.Disconnect()
-	fmt.Println("Connected to SCM")
 
 	services, err := m.OpenService(serviceName)
 	if err != nil {
 		return false, fmt.Errorf("failed to open service: %w", err)
 	}
-	fmt.Println("Service:", services.Name)
 	defer services.Close()
 
 	status, err := services.Query()
 	if err != nil {
 		return false, fmt.Errorf("failed to query service status: %w", err)
 	}
-	fmt.Println("Service status:", status.State)
 
 	return status.State == svc.Running, nil
+}
+
+func printReport(results []ServiceResult) {
+	for _, result := range results {
+		if result.err != nil {
+			fmt.Printf("Service: %s, Error: %v\n", result.Name, result.err)
+		} else {
+			fmt.Printf("Service: %s, Is Running: %v\n", result.Name, result.IsRunning)
+		}
+	}
 }
