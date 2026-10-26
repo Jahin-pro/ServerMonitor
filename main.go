@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"golang.org/x/sys/windows/svc/mgr"
@@ -39,13 +40,23 @@ func main() {
 	serviceResults := collectResults(serviceNames)
 	printReport(serviceResults)*/
 
-	connectToLocalSQL, err := checkTCP("localhost:5432", 2*time.Second)
+	adresses := []string{"127.0.0.1:7890", "127.0.0.1:57857", "127.0.0.1:12345"}
+	var wg sync.WaitGroup
 
-	if err != nil {
-		fmt.Println(err)
+	for _, address := range adresses {
+		wg.Add(1)
+		go func(address string) {
+			defer wg.Done()
+			connectToLocalSQL, err := checkTCP(address, 2*time.Second)
+
+			if err == nil {
+				fmt.Printf("Connect to %s: %v\n", address, connectToLocalSQL)
+			} else {
+				fmt.Printf("Error connecting to %s: %v\n", address, err)
+			}
+		}(address)
 	}
-
-	fmt.Printf("Connet to localhost:5432: %v\n", connectToLocalSQL)
+	wg.Wait()
 }
 
 func checkServer(name string) (bool, error) {
